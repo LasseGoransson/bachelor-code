@@ -1,0 +1,9 @@
+modelname: VGG16_test1
+batch_size: 8
+image_height: 500
+image_width: 500
+
+data:
+    - train_path: data/allTrain.csv
+    - validate_path: data/allVal.csv
+
