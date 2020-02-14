@@ -14,6 +14,11 @@ import math
 import sys
 import yaml
 
+
+gpus = tf.config.experimental.list_physical_devices('GPU')
+
+tf.config.experimental.set_virtual_device_configuration(gpus[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)])
+
 stream = file('config.yml', 'r')    # 'document.yaml' contains a single YAML document.
 conf = yaml.safe_load(stream)
 
@@ -24,6 +29,7 @@ validate_path = conf['data'][1]['validate_path']
 image_dir = conf['data'][2]['image_dir']
 logFileName = conf['data'][3]['log_file']
 checkpointpath = conf['data'][4]['checkpoint_path']
+modelName = conf['modelname']
 
 learning_rate = conf['model'][0]['learning_rate']
 
@@ -93,16 +99,17 @@ model.compile(optimizer=optimize,
 
 currentEpoch=0
 
-filepath=str(checkpointpath)+"model_"+str(modelNum)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_loss:.5f}.hdf5"
+filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_loss:.5f}.hdf5"
 
 checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
 
 earlyStop = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=25, restore_best_weights=True,verbose=1)
 
-csvLog = keras.callbacks.callbacks.CSVLogger(logFileName, separator=',', append=True)
+csvLog = keras.callbacks.CSVLogger(logFileName, separator=str(u','), append=True)
 
-callbacks_list = [checkpoint]
+callbacks_list = [checkpoint,csvLog]
 
+model.summary()
 history = model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=currentEpoch+(300-currentEpoch), steps_per_epoch=train_generator.n/train_generator.batch_size ,initial_epoch=currentEpoch, callbacks=callbacks_list)
 
 currentEpoch=len(history.history["loss"])
