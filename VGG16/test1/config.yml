@@ -1,9 +1,15 @@
+---
 modelname: VGG16_test1
 batch_size: 8
 image_height: 500
 image_width: 500
 
 data:
-    - train_path: data/allTrain.csv
-    - validate_path: data/allVal.csv
+    - train_path: ../../data/allTrain.csv
+    - validate_path: ../../data/allVal.csv
+    - image_dir: ../../data/xrayTrain/
+    - log_file: csvLog.csv
+    - checkpoint_path: checkpoints/
 
+model:
+    - learning_rate: 0.001
