@@ -18,7 +18,7 @@ import yaml
 gpus = tf.config.experimental.list_physical_devices('GPU')
 
 
-stream = file('config.yml', 'r')    # 'document.yaml' contains a single YAML document.
+stream = open('config.yml', 'r')    # 'document.yaml' contains a single YAML document.
 conf = yaml.safe_load(stream)
 
 
