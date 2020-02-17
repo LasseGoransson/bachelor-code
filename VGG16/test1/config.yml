@@ -5,8 +5,8 @@ image_height: 650
 image_width: 650
 
 data:
-    - train_path: ../../data/allTrainSmall.csv
-    - validate_path: ../../data/allValSmall.csv
+    - train_path: ../../../data/allTrain.csv
+    - validate_path: ../../../data/allVal.csv
     - image_dir: ../../data/
     - log_file: csvLog.csv
     - checkpoint_path: checkpoints/
