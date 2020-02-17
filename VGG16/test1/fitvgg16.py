@@ -17,7 +17,6 @@ import yaml
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 
-tf.config.experimental.set_virtual_device_configuration(gpus[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)])
 
 stream = file('config.yml', 'r')    # 'document.yaml' contains a single YAML document.
 conf = yaml.safe_load(stream)
