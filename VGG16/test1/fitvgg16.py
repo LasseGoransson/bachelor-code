@@ -91,7 +91,7 @@ model.add(Dense(1))
 #model.summary()
 
 
-optimize = keras.optimizers.RMSprop(learning_rate=learning_rate)
+optimize = keras.optimizers.SGD(lr=learning_rate)
 model.compile(optimizer=optimize,
               loss='MSE',
               metrics=['mse']

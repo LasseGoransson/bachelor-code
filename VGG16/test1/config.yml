@@ -1,8 +1,8 @@
 ---
 modelname: VGG16_test1
-batch_size: 2
-image_height: 100
-image_width: 100
+batch_size: 4
+image_height: 650
+image_width: 650
 
 data:
     - train_path: ../../data/allTrainSmall.csv
@@ -12,4 +12,4 @@ data:
     - checkpoint_path: checkpoints/
 
 model:
-    - learning_rate: 0.001
+    - learning_rate: 0.01
