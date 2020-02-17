@@ -23,5 +23,5 @@ done
 split -l $(echo "4368*0.8" | bc -l | cut -d"." -f1) allTrain.csv
 
 mv xaa allTrain.csv
-mv xab allVal.csv
+cat xab >> allVal.csv
 
