@@ -1,0 +1,15 @@
+---
+modelname: resnet50_freeze_std_MPL
+batch_size: 32
+image_height: 244
+image_width: 224
+
+data:
+    - train_path: /home/lasg/data_resize/allTrain.csv
+    - validate_path: /home/lasg/data_resize/allTest.csv
+    - image_dir: /home/lasg/data_resize/
+    - log_file: csvLog.csv
+    - checkpoint_path: checkpoints/
+
+model:
+    - learning_rate: 0.001
