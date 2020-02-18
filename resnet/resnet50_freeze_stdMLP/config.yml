@@ -5,9 +5,9 @@ image_height: 244
 image_width: 224
 
 data:
-    - train_path: /home/lasg/data_resize/allTrain.csv
-    - validate_path: /home/lasg/data_resize/allTest.csv
-    - image_dir: /home/lasg/data_resize/
+    - train_path: ../../data_resize/allTrain.csv
+    - validate_path: ../../data_resize/allTest.csv
+    - image_dir: ../../data_resize/
     - log_file: csvLog.csv
     - checkpoint_path: checkpoints/
 

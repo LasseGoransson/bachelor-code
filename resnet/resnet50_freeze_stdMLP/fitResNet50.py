@@ -76,19 +76,21 @@ RESNET = keras.applications.resnet.ResNet50(include_top=False, weights='imagenet
 
 model = tf.keras.Sequential()
 
-for layer in RESNET.layers:
-  model.add(layer)
+#for layer in RESNET.layers:
+#  model.add(layer)
 
-for l in model.layers:
-    l.trainable=False
+#for l in model.layers:
+#    l.trainable=False
 
+model.add(RESNET)
+model.layers[0].trainable=False
 
-model.add(Dense(512),Activation="relu")
-model.add(Dense(256),Activation="relu")
+model.add(Dense(512,Activation("relu")))
+model.add(Dense(256,Activation("relu")))
 model.add(Dense(1))
 
 
-optimize = keras.optimizers.RMSprop(learning_rate=learning_rate)
+optimize = keras.optimizers.Adam(learning_rate=learning_rate)
 model.compile(optimizer=optimize,
               loss='MSE',
               metrics=['mse']
@@ -107,6 +109,6 @@ csvLog = keras.callbacks.CSVLogger(logFileName, separator=str(u','), append=True
 callbacks_list = [checkpoint,csvLog]
 
 model.summary()
-history = model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=currentEpoch+(300-currentEpoch), steps_per_epoch=train_generator.n/train_generator.batch_size ,initial_epoch=currentEpoch, callbacks=callbacks_list)
+history = model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=currentEpoch+(50-currentEpoch), steps_per_epoch=train_generator.n/train_generator.batch_size ,initial_epoch=currentEpoch, callbacks=callbacks_list)
 
 currentEpoch=len(history.history["loss"])
