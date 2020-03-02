@@ -141,5 +141,6 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=numEpochs, steps_per_epoch=train_generator.n/train_generator.batch_size , callbacks=callbacks_list)
 
     f=os.listdir(checkpointpath)
+    f=sorted(f)
     modelfileName = os.listdir(checkpointpath)[len(f)-1]
     npexp.send_artifact(checkpointpath+modelfileName)
