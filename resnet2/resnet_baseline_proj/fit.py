@@ -142,7 +142,10 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     model.summary()
     model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=numEpochs, steps_per_epoch=train_generator.n/train_generator.batch_size , callbacks=callbacks_list)
 
-    f=os.listdir(checkpointpath)
-    f=sorted(f)
-    modelfileName = os.listdir(checkpointpath)[len(f)-1]
-    npexp.send_artifact(checkpointpath+modelfileName)
+    import glob
+
+    list_of_files = glob.glob(checkpointpath+"*") # * means all if need specific format then *.csv
+    latest_file = max(list_of_files, key=os.path.getctime)
+    modelfileName = latest_file
+
+    npexp.send_artifact(modelfileName)

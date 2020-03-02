@@ -128,7 +128,7 @@ RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience
 
 checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
 
-earlyStop = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=25, restore_best_weights=True,verbose=1)
+earlyStop = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=10, restore_best_weights=True,verbose=1)
 
 csvLog = keras.callbacks.CSVLogger(logFileName, separator=str(u','), append=False)
 
@@ -140,7 +140,10 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     model.summary()
     model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=numEpochs, steps_per_epoch=train_generator.n/train_generator.batch_size , callbacks=callbacks_list)
 
-    f=os.listdir(checkpointpath)
-    f=sorted(f)
-    modelfileName = os.listdir(checkpointpath)[len(f)-1]
-    npexp.send_artifact(checkpointpath+modelfileName)
+    import glob
+
+    list_of_files = glob.glob(checkpointpath+"*") # * means all if need specific format then *.csv
+    latest_file = max(list_of_files, key=os.path.getctime)
+    modelfileName = latest_file 
+
+    npexp.send_artifact(modelfileName)
