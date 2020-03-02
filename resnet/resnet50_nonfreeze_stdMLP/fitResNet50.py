@@ -83,7 +83,7 @@ model = tf.keras.Sequential()
 #    l.trainable=False
 
 model.add(RESNET)
-model.layers[0].trainable=False
+#model.layers[0].trainable=False
 
 model.add(Dense(512,Activation("relu")))
 model.add(Dense(256,Activation("relu")))

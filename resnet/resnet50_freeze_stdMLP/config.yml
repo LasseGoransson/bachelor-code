@@ -1,5 +1,5 @@
 ---
-modelname: resnet50_freeze_std_MPL
+modelname: resnet50_freeze_stdMPL
 batch_size: 32
 image_height: 224
 image_width: 224
