@@ -51,7 +51,8 @@ validate_df = pandas.read_csv(validate_path)
 train_datagen = ImageDataGenerator(
         rescale=1./255,
         horizontal_flip=True,
-        vertical_flip=True
+        vertical_flip=True,
+        rotation_range=5
         )
 
 val_datagen = ImageDataGenerator(

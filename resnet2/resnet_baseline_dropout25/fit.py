@@ -101,9 +101,9 @@ model.add(RESNET)
 #model.layers[1].trainable=True
 
 model.add(Dense(512,Activation("relu")))
-#model.add(Dropout(0.50))
+model.add(Dropout(0.25))
 model.add(Dense(256,Activation("relu")))
-#model.add(Dropout(0.50))
+model.add(Dropout(0.25))
 model.add(Dense(1))
 
 
