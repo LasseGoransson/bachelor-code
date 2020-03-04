@@ -1,0 +1,15 @@
+---
+batch_size: 32
+image_height: 224
+image_width: 224
+epochs: 5
+
+data:
+    - train_path: ../../../bachelor-data/data_resize/allTrain.csv
+    - validate_path: ../../../bachelor-data/data_resize/allTest.csv
+    - image_dir: ../../../bachelor-data/data_resize/
+    - log_file: csvLog.csv
+    - checkpoint_path: checkpoints/
+
+model:
+    - learning_rate: 0.001

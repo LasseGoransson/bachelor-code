@@ -67,7 +67,8 @@ train_generator = train_datagen.flow_from_dataframe(
         target_size=(image_height, image_width),
         batch_size=batch_size,
         shuffle=True,
-        class_mode="raw"
+        class_mode="raw",
+        color_mode="grayscale"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -78,7 +79,8 @@ val_generator = val_datagen.flow_from_dataframe(
         target_size=(image_height, image_width),
         batch_size=batch_size,
         shuffle=True,
-        class_mode="raw"
+        class_mode="raw",
+        color_mode="grayscale"
         )
 
 
@@ -95,17 +97,17 @@ model = tf.keras.Sequential()
 #    l.trainable=False
 
 # Projection
-#model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
+model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
 
 model.add(RESNET)
 #model.layers[1].trainable=True
 
 model.add(Dense(512,Activation("relu")))
-model.add(Dropout(0.25))
+#model.add(Dropout(0.50))
 model.add(Dense(256,Activation("relu")))
-model.add(Dropout(0.25))
+#model.add(Dropout(0.50))
 model.add(Dense(128,Activation("relu")))
-model.add(Dropout(0.25))
+model.add(Dense(64,Activation("relu")))
 model.add(Dense(1))
 
 
@@ -124,9 +126,7 @@ class NeptuneMonitor(Callback):
 
 
 
-filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_loss:.5f}.hdf5"
-
-tensorboard_callback = keras.callbacks.TensorBoard(log_dir="tensorboard/")
+filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_loss:.12f}.hdf5"
 
 RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
 
@@ -139,7 +139,7 @@ csvLog = keras.callbacks.CSVLogger(logFileName, separator=str(u','), append=Fals
 with neptune.create_experiment(name=modelName, params=conf) as npexp:
     neptune_monitor = NeptuneMonitor()
 
-    callbacks_list = [checkpoint,csvLog, neptune_monitor, RLR, earlyStop, tensorboard_callback]
+    callbacks_list = [checkpoint,csvLog, neptune_monitor, RLR, earlyStop]
 
     model.summary()
     model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=numEpochs, steps_per_epoch=train_generator.n/train_generator.batch_size , callbacks=callbacks_list)
@@ -151,3 +151,6 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     modelfileName = latest_file 
 
     npexp.send_artifact(modelfileName)
+    tmp = modelfileName.split('-')[3].split('.')
+    val = float(tmp[0]+"."+tmp[1])
+    neptune.send_metric('val_loss', val)
