@@ -51,7 +51,8 @@ validate_df = pandas.read_csv(validate_path)
 train_datagen = ImageDataGenerator(
         rescale=1./255,
         horizontal_flip=True,
-        vertical_flip=True
+        vertical_flip=True,
+        rotation_range=5
         )
 
 val_datagen = ImageDataGenerator(
@@ -102,16 +103,13 @@ model = tf.keras.Sequential()
 model.add(RESNET)
 #model.layers[1].trainable=True
 
-model.add(Dense(2048,Activation("relu")))
-#model.add(Dropout(0.50))
-#model.add(Dense(256,Activation("relu")))
-#model.add(Dropout(0.50))
-#model.add(Dense(128,Activation("relu")))
-#model.add(Dropout(0.50))
-#model.add(Dense(64,Activation("relu")))
-#model.add(Dropout(0.50))
-model.add(Dense(1))
 
+model.add(Dense(512,Activation("relu")))
+#model.add(Dropout(0.50))
+model.add(Dense(256,Activation("relu")))
+#model.add(Dropout(0.50))
+model.add(Dense(128,Activation("relu")))
+model.add(Dense(1))
 
 optimize = keras.optimizers.Adam(learning_rate=learning_rate)
 model.compile(optimizer=optimize,
