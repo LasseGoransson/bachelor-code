@@ -12,4 +12,4 @@ data:
     - checkpoint_path: checkpoints/
 
 model:
-    - learning_rate: 0.01
+    - learning_rate: 0.001
