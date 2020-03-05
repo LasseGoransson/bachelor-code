@@ -14,32 +14,39 @@ import pathlib
 import datetime
 import math
 import sys
-import yaml
 
 # GPU setup
 gpus = tf.config.experimental.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(gpus[0], True) 
 
 # Config loading
-stream = file('config.yml', 'r')    # 'document.yaml' contains a single YAML document.
-conf = yaml.safe_load(stream)
 
+train_path = "../../bachelor-data/data_resize/allTrain.csv"
+validate_path ="../../bachelor-data/data_resize/allTest.csv"
 
-train_path = conf['data'][0]['train_path']
-validate_path = conf['data'][1]['validate_path']
+image_dir = "../../bachelor-data/data_resize/"
+checkpointpath = "../../bachelor-data/checkpoints/"
+modelName = sys.argv[0]
 
-image_dir = conf['data'][2]['image_dir']
-logFileName = conf['data'][3]['log_file']
-checkpointpath = conf['data'][4]['checkpoint_path']
-modelName = os.getcwd()
-modelName = os.path.basename(modelName)
+learning_rate = 0.001
 
-learning_rate = conf['model'][0]['learning_rate']
+image_height = 224
+image_width = 224
+batch_size = 32
+numEpochs = 75
 
-image_height = conf['image_height']
-image_width = conf['image_width']
-batch_size = conf['batch_size']
-numEpochs = conf['epochs']
+conf= {
+        "train_path": train_path,
+        "validate_path": validate_path,
+        "image_dir": image_dir,
+        "modelName": modelName,
+        "learning_rate": learning_rate,
+        "image_height": image_height,
+        "image_width": image_width,
+        "batch_size": batch_size,
+        "numEpochs": numEpochs
+        }
+
 
 # select project
 neptune.init('lassegoransson/xrayPredictor')
@@ -67,7 +74,8 @@ train_generator = train_datagen.flow_from_dataframe(
         target_size=(image_height, image_width),
         batch_size=batch_size,
         shuffle=True,
-        class_mode="raw"
+        class_mode="raw",
+        color_mode="grayscale"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -78,14 +86,12 @@ val_generator = val_datagen.flow_from_dataframe(
         target_size=(image_height, image_width),
         batch_size=batch_size,
         shuffle=True,
-        class_mode="raw"
+        class_mode="raw",
+        color_mode="grayscale"
         )
 
-
 # Model
-
 RESNET = keras.applications.resnet.ResNet50(include_top=False, weights='imagenet', input_shape=(image_height,image_width,3), pooling="avg")
-
 model = tf.keras.Sequential()
 
 #for layer in RESNET.layers:
@@ -95,7 +101,7 @@ model = tf.keras.Sequential()
 #    l.trainable=False
 
 # Projection
-#model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
+model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
 
 model.add(RESNET)
 #model.layers[1].trainable=True
@@ -126,7 +132,7 @@ class NeptuneMonitor(Callback):
 
 
 
-filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_loss:.5f}.hdf5"
+filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_loss:.16f}.hdf5"
 
 RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
 
@@ -134,15 +140,13 @@ checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbo
 
 earlyStop = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=10, restore_best_weights=True,verbose=1)
 
-csvLog = keras.callbacks.CSVLogger(logFileName, separator=str(u','), append=False)
-
 with neptune.create_experiment(name=modelName, params=conf) as npexp:
     neptune_monitor = NeptuneMonitor()
 
-    callbacks_list = [checkpoint,csvLog, neptune_monitor, RLR, earlyStop]
+    callbacks_list = [checkpoint, neptune_monitor, RLR, earlyStop]
 
     model.summary()
-    model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=numEpochs, steps_per_epoch=train_generator.n/train_generator.batch_size , callbacks=callbacks_list)
+    history = model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=numEpochs, steps_per_epoch=train_generator.n/train_generator.batch_size , callbacks=callbacks_list)
 
     import glob
 
@@ -151,6 +155,6 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     modelfileName = latest_file 
 
     npexp.send_artifact(modelfileName)
-    tmp = modelfileName.split('-')[3].split('.')
+    tmp = modelfileName.split('-')[4].split('.')
     val = float(tmp[0]+"."+tmp[1])
     neptune.send_metric('val_loss', val)
