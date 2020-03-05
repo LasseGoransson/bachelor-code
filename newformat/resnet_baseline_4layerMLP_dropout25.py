@@ -14,16 +14,12 @@ import pathlib
 import datetime
 import math
 import sys
-import yaml
 
 # GPU setup
 gpus = tf.config.experimental.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(gpus[0], True) 
 
 # Config loading
-stream = file('config.yml', 'r')    # 'document.yaml' contains a single YAML document.
-conf = yaml.safe_load(stream)
-
 
 train_path = "../../../bachelor-data/data_resize/allTrain.csv"
 validate_path ="../../../bachelor-data/data_resize/allTest.csv"
