@@ -25,7 +25,7 @@ train_path = "../../bachelor-data/data_resize/allTrain.csv"
 validate_path ="../../bachelor-data/data_resize/allTest.csv"
 
 image_dir = "../../bachelor-data/data_resize/"
-checkpointpath = "../..//bachelor-data/checkpoints/"
+checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
 learning_rate = 0.001
@@ -146,7 +146,7 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     callbacks_list = [checkpoint, neptune_monitor, RLR, earlyStop]
 
     model.summary()
-    model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=numEpochs, steps_per_epoch=train_generator.n/train_generator.batch_size , callbacks=callbacks_list)
+    history = model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=numEpochs, steps_per_epoch=train_generator.n/train_generator.batch_size , callbacks=callbacks_list)
 
     import glob
 
@@ -155,6 +155,6 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     modelfileName = latest_file 
 
     npexp.send_artifact(modelfileName)
-    tmp = modelfileName.split('-')[3].split('.')
+    tmp = modelfileName.split('-')[4].split('.')
     val = float(tmp[0]+"."+tmp[1])
     neptune.send_metric('val_loss', val)
