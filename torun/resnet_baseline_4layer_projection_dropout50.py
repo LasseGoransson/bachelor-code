@@ -77,7 +77,7 @@ train_generator = train_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="rgb"
+        color_mode="grayscale"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -89,23 +89,29 @@ val_generator = val_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="rgb"
+        color_mode="grayscale"
         )
 
 # Model
 RESNET = keras.applications.resnet.ResNet50(include_top=False, weights='imagenet', input_shape=(image_height,image_width,3), pooling="avg")
 model = tf.keras.Sequential()
 
-
 # Projection
-#model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
+model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
 
 # Resnet
 model.add(RESNET)
 
-model.add(Dense(2048,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
+model.add(Dense(512,Activation("relu")))
+model.add(Dropout(0.50))
+model.add(Dense(256,Activation("relu")))
+model.add(Dropout(0.50))
+model.add(Dense(128,Activation("relu")))
+model.add(Dropout(0.50))
+model.add(Dense(64,Activation("relu")))
 model.add(Dropout(0.50))
 model.add(Dense(1))
+
 
 
 optimize = keras.optimizers.Adam(learning_rate=learning_rate)
