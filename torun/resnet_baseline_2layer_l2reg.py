@@ -119,7 +119,7 @@ class NeptuneMonitor(Callback):
         neptune.send_metric('val_loss', epoch, logs['val_loss'])
         neptune.send_metric('val_mse', epoch, logs['val_mse'])
         neptune.send_metric('loss', epoch, logs['loss'])
-        neptune.send_metric('loss_mse', epoch, logs['loss_mse'])
+        neptune.send_metric('mse', epoch, logs['mse'])
         neptune.send_metric('learning_rate', epoch, float(tf.keras.backend.get_value(self.model.optimizer.lr)))
 
 
