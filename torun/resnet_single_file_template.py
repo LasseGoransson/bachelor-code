@@ -76,7 +76,7 @@ train_generator = train_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -88,7 +88,7 @@ val_generator = val_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 # Model
@@ -97,7 +97,7 @@ model = tf.keras.Sequential()
 
 
 # Projection
-model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
+#model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
 
 # Resnet
 model.add(RESNET)
@@ -105,7 +105,6 @@ model.add(RESNET)
 model.add(Dense(512,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
 model.add(Dense(256,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
 model.add(Dense(128,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
-model.add(Dense(64,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
 model.add(Dense(1))
 
 
@@ -121,7 +120,7 @@ class NeptuneMonitor(Callback):
         neptune.send_metric('val_loss', epoch, logs['val_loss'])
         neptune.send_metric('val_mse', epoch, logs['val_mse'])
         neptune.send_metric('loss', epoch, logs['loss'])
-        neptune.send_metric('loss_mse', epoch, logs['loss_mse'])
+        neptune.send_metric('mse', epoch, logs['mse'])
         neptune.send_metric('learning_rate', epoch, float(tf.keras.backend.get_value(self.model.optimizer.lr)))
 
 
