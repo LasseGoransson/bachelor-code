@@ -60,7 +60,7 @@ train_datagen = ImageDataGenerator(
         rescale=1./255,
         horizontal_flip=True,
         vertical_flip=True,
-        rotation_range=5
+        rotation_range=10
         )
 
 val_datagen = ImageDataGenerator(
