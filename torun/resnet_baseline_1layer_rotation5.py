@@ -59,7 +59,8 @@ validate_df = pandas.read_csv(validate_path)
 train_datagen = ImageDataGenerator(
         rescale=1./255,
         horizontal_flip=True,
-        vertical_flip=True
+        vertical_flip=True,
+        rotation_range=5
         )
 
 val_datagen = ImageDataGenerator(
@@ -76,7 +77,7 @@ train_generator = train_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -88,7 +89,7 @@ val_generator = val_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 # Model
@@ -97,7 +98,7 @@ model = tf.keras.Sequential()
 
 
 # Projection
-model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
+#model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
 
 # Resnet
 model.add(RESNET)
