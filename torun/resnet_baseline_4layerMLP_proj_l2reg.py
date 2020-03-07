@@ -154,6 +154,3 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     modelfileName = latest_file 
 
     npexp.send_artifact(modelfileName)
-    tmp = modelfileName.split('-')[4].split('.')
-    val = float(tmp[0]+"."+tmp[1])
-    neptune.send_metric('val_loss', val)
