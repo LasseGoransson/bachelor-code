@@ -104,7 +104,7 @@ model = tf.keras.Sequential()
 model.add(RESNET)
 
 model.add(Dense(2048,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
-model.add(Dropout(0.25))
+model.add(Dropout(0.50))
 model.add(Dense(1))
 
 
