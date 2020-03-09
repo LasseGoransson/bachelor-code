@@ -102,13 +102,13 @@ model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"
 # Resnet
 model.add(RESNET)
 
-model.add(Dense(512,Activation("relu")))
+model.add(Dense(512,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
 model.add(Dropout(0.25))
-model.add(Dense(256,Activation("relu")))
+model.add(Dense(256,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
 model.add(Dropout(0.25))
-model.add(Dense(128,Activation("relu")))
+model.add(Dense(128,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
 model.add(Dropout(0.25))
-model.add(Dense(64,Activation("relu")))
+model.add(Dense(64,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
 model.add(Dropout(0.25))
 model.add(Dense(1))
 
