@@ -18,12 +18,11 @@ Augmentation options:
 
 Combinations NOT run:
 
-4layer projection rotation10
 
 
 
 
-Combinations completed:
+Combinations completed: (224x224)
 
 1layer
 1layer projection 
