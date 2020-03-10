@@ -106,7 +106,7 @@ model.add(Dense(512,Activation("relu")))
 model.add(Dense(256,Activation("relu")))
 model.add(Dense(128,Activation("relu")))
 model.add(Dense(64,Activation("relu")))
-model.add(Dense(1,Activation("relu")))
+model.add(Dense(1))
 
 
 optimize = keras.optimizers.Adam(learning_rate=learning_rate)
