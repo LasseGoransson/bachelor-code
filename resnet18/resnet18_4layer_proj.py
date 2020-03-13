@@ -32,8 +32,8 @@ modelName = sys.argv[0]
 
 learning_rate = 0.001
 
-image_height = 448
-image_width = 448
+image_height = 224
+image_width = 224
 batch_size = 32
 numEpochs = 75
 
