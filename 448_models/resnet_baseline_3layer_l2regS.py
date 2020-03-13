@@ -33,7 +33,7 @@ learning_rate = 0.001
 
 image_height = 448
 image_width = 448
-batch_size = 32
+batch_size = 16
 numEpochs = 75
 
 conf= {
@@ -105,9 +105,9 @@ model.add(RESNET)
 
 
 
-model.add(Dense(512,Activation("relu"), kernel_regularizer=regularizers.l2(0.1)))
-model.add(Dense(256,Activation("relu"), kernel_regularizer=regularizers.l2(0.1)))
-model.add(Dense(128,Activation("relu"), kernel_regularizer=regularizers.l2(0.1)))
+model.add(Dense(512,Activation("relu"), kernel_regularizer=regularizers.l2(0.001)))
+model.add(Dense(256,Activation("relu"), kernel_regularizer=regularizers.l2(0.001)))
+model.add(Dense(128,Activation("relu"), kernel_regularizer=regularizers.l2(0.001)))
 model.add(Dense(1))
 
 
