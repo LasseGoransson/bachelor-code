@@ -68,7 +68,7 @@ val_datagen = ImageDataGenerator(
 
 
 train_generator = train_datagen.flow_from_directory(
-        ".././bachelor-data/data_cat/xrayTrain"
+        "../../bachelor-data/data_cat/xrayTrain"
         target_size=(image_height, image_width),
         batch_size=batch_size,
         shuffle=True,
@@ -76,7 +76,7 @@ train_generator = train_datagen.flow_from_directory(
         )
 
 val_generator = val_datagen.flow_from_dataframe(
-        ".././bachelor-data/data_cat/xrayTrain"
+        "../../bachelor-data/data_cat/xrayTrain"
         target_size=(image_height, image_width),
         batch_size=batch_size,
         shuffle=True,
@@ -101,15 +101,13 @@ model.add(Dense(128,Activation("relu"),kernel_regularizer=regularizers.l2(0.01))
 model.add(Dropout(0.25))
 model.add(Dense(64,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
 model.add(Dropout(0.25))
-model.add(Dense(1))
+model.add(Dense(3))
 
 
 
-optimize = keras.optimizers.Adam(learning_rate=learning_rate)
-model.compile(optimizer=optimize,
-              loss='MSE',
-              metrics=['accuracy']
-              )
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
 
 
 class NeptuneMonitor(Callback):
