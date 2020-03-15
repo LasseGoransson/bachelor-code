@@ -26,7 +26,7 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 train_path = "../../bachelor-data/data_resize/allTrain.csv"
 validate_path ="../../bachelor-data/data_resize/allTest.csv"
 
-image_dir = "../../bachelor-data/data_resize/"
+image_dir = "../../bachelor-data/data_resize_cut/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 

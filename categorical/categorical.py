@@ -22,10 +22,10 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # Config loading
 
-train_path = "../../bachelor-data/data_resize/allTrain.csv"
-validate_path ="../../bachelor-data/data_resize/allTest.csv"
+train_path = "../../bachelor-data/data_cat/allTrain.csv"
+validate_path ="../../bachelor-data/data_cat/allTest.csv"
 
-image_dir = "../../bachelor-data/data_resize/"
+image_dir = "../../bachelor-data/data_cat/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
@@ -53,8 +53,13 @@ conf= {
 neptune.init('lassegoransson/xrayPredictor-categorical')
 
 # Data generators
-train_df = pandas.read_csv(train_path)
-validate_df = pandas.read_csv(validate_path)
+train_df = pandas.read_csv(train_path,sep=';')
+validate_df = pandas.read_csv(validate_path,sep=';')
+
+print(train_df)
+train_df['filename'] = train_df['filename'].astype(str) 
+validate_df['filename'] = validate_df['filename'].astype(str) 
+
 
 train_datagen = ImageDataGenerator(
         rescale=1./255,
@@ -67,43 +72,46 @@ val_datagen = ImageDataGenerator(
         )
 
 
-train_generator = train_datagen.flow_from_directory(
-        "../../bachelor-data/data_cat/xrayTrain"
-        target_size=(image_height, image_width),
-        batch_size=batch_size,
-        shuffle=True,
-        color_mode="grayscale"
-        )
+train_generator = train_datagen.flow_from_dataframe(
+         dataframe=train_df,
+         directory=image_dir,
+         x_col="filename",
+         y_col='label',
+         target_size=(image_height, image_width),
+         batch_size=batch_size,
+         shuffle=True,
+         class_mode="sparse",
+         color_mode="rgb"
+         )
 
 val_generator = val_datagen.flow_from_dataframe(
-        "../../bachelor-data/data_cat/xrayTrain"
-        target_size=(image_height, image_width),
-        batch_size=batch_size,
-        shuffle=True,
-        color_mode="grayscale"
-        )
+         dataframe=validate_df,
+         directory=image_dir,
+         x_col="filename",
+         y_col='label',
+         target_size=(image_height, image_width),
+         batch_size=batch_size,
+         shuffle=True,
+         class_mode="sparse",
+         color_mode="rgb"
+         )
+
+
 
 # Model
 RESNET = keras.applications.resnet.ResNet50(include_top=False, weights='imagenet', input_shape=(image_height,image_width,3), pooling="avg")
 model = tf.keras.Sequential()
 
 # Projection
-model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
-
 # Resnet
 model.add(RESNET)
 
-model.add(Dense(512,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
-model.add(Dropout(0.25))
-model.add(Dense(256,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
-model.add(Dropout(0.25))
-model.add(Dense(128,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
-model.add(Dropout(0.25))
-model.add(Dense(64,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
-model.add(Dropout(0.25))
-model.add(Dense(3))
+#model.layers[1].trainable=False
 
 
+model.add(Dropout(0.5))
+
+model.add(Dense(3,Activation("softmax")))
 
 model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
@@ -122,11 +130,11 @@ class NeptuneMonitor(Callback):
 
 filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_accuracy:.16f}.hdf5"
 
-RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
+RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy', factor=0.5, patience=2, verbose=1, mode='max', min_delta=0.0001, cooldown=0)
 
-checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_accuracy', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
+checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_accuracy', verbose=0, save_best_only=True, save_weights_only=False, mode='max')
 
-earlyStop = keras.callbacks.EarlyStopping(monitor='val_accuracy', mode='min', patience=10, restore_best_weights=True,verbose=1)
+earlyStop = keras.callbacks.EarlyStopping(monitor='val_accuracy', mode='max', patience=10, restore_best_weights=True,verbose=1)
 
 with neptune.create_experiment(name=modelName, params=conf) as npexp:
     neptune_monitor = NeptuneMonitor()
