@@ -1,4 +1,6 @@
 .ipynb_checkpoints/
+.cache/
+.keras/
 *.hdf5
 *.png
 evalenv/

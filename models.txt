@@ -18,11 +18,44 @@ Augmentation options:
 
 Combinations NOT run:
 
+1layer
+1layer rotation5
+1layer rotation10
+1layer dropout25
+1layer dropout50
+1layer l2reg
+
+2layer 
+2layer projection
+2layer rotation5
+2layer rotation10
+2layer dropout25
+2layer dropout50
+2layer l2reg
 
 
+3layer
+3layer projection
+3layer rotation5
+3layer rotation10
+3layer dropout25
+3layer dropout50
+3layer l2reg
 
+4layer
+4layer rotation5
+4layer rotation10
+4layer dropout25
+4layer dropout50
 
-Combinations completed: (224x224)
+Combinations completed: (224x224) resnet18
+
+1layer projection 
+1layer projection dropout25
+
+4layer projection
+
+Combinations completed: (224x224) resnet50
 
 1layer
 1layer projection 
