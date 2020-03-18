@@ -75,7 +75,7 @@ train_generator = train_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="rgb"
+        color_mode="grayscale"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -87,7 +87,7 @@ val_generator = val_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="rgb"
+        color_mode="grayscale"
         )
 
 # Model
