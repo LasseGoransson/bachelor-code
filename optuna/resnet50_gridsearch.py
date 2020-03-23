@@ -164,11 +164,11 @@ def objective(trial):
 
     filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_mse:.16f}.hdf5"
 
-    RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_mse', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
+    RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_mse', factor=0.5, patience=4, verbose=1, mode='min', min_delta=0.00001, cooldown=0)
 
     checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_mse', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
 
-    earlyStop = keras.callbacks.EarlyStopping(monitor='val_mse', mode='min', patience=10, restore_best_weights=True,verbose=1)
+    earlyStop = keras.callbacks.EarlyStopping(monitor='val_mse', mode='min', patience=15, restore_best_weights=True,verbose=1)
 
 
 
