@@ -56,7 +56,8 @@ conf= {
 # Model
 def objective(trial):
 
-    RESNET = keras.applications.resnet.ResNet50(include_top=False, weights='imagenet', input_shape=(image_height,image_width,3), pooling="avg")
+    ResNet18, preprocess_input = Classifiers.get('resnet18')
+    RESNET = ResNet18(include_top=False, weights='imagenet', input_shape=(image_height,image_width,3))
     model = tf.keras.Sequential()
 
     
@@ -66,24 +67,16 @@ def objective(trial):
         model.add(Conv2D(3,(1,1),input_shape=(image_height,image_width,1),padding="same"))
 
 
-    dropout_rate = float(trial.suggest_categorical('dropout_rate', ['0','0.25', '0.50']))
-    layers = int(trial.suggest_categorical('num_layers', ['1','2','3','4']))
+    dropout_rate = trial.suggest_uniform('dropout_rate', 0.0, 0.5)
     # Resnet
     model.add(RESNET)
 
+    model.add(GlobalAveragePooling2D())
+    model.add(Dropout(dropout_rate))
 
-    if int(layers) > 0:
-        model.add(Dense(512,Activation("relu")))
-        model.add(Dropout(dropout_rate))
-    if int(layers) > 1:
-        model.add(Dense(256,Activation("relu")))
-        model.add(Dropout(dropout_rate))
-    if int(layers) > 2:
-        model.add(Dense(128,Activation("relu")))
-        model.add(Dropout(dropout_rate))
-    if int(layers) > 3:
-        model.add(Dense(64,Activation("relu")))
-        model.add(Dropout(dropout_rate))
+    model.add(Dense(trial.suggest_int("num_neurons_1",1,512),Activation("relu")))
+    model.add(Dense(trial.suggest_int("num_neurons_2",1,512),Activation("relu")))
+    model.add(Dense(trial.suggest_int("num_neurons_3",1,512),Activation("relu")))
 
     model.add(Dense(1))
 
@@ -164,11 +157,11 @@ def objective(trial):
 
     filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_mse:.16f}.hdf5"
 
-    RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_mse', factor=0.5, patience=4, verbose=1, mode='min', min_delta=0.00001, cooldown=0)
+    RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_mse', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
 
     checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_mse', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
 
-    earlyStop = keras.callbacks.EarlyStopping(monitor='val_mse', mode='min', patience=15, restore_best_weights=True,verbose=1)
+    earlyStop = keras.callbacks.EarlyStopping(monitor='val_mse', mode='min', patience=10, restore_best_weights=True,verbose=1)
 
 
 
@@ -181,8 +174,7 @@ def objective(trial):
 
     val = history.history['val_mse']
     os.system("rm /home/lasg/bachelor-data/checkpoints/*")
-    tf.keras.backend.clear_session()
     return val[-1]
 
-study = optuna.create_study(study_name="no-name-c4909e6e-5335-4ccd-8ebe-189280e2d040",direction='minimize', storage='sqlite:///optunaDB.db', load_if_exists=True)
+study = optuna.create_study(direction='minimize', storage='sqlite:///optunaDB.db')
 study.optimize(objective, n_trials=100)

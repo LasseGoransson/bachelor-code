@@ -7,7 +7,6 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras import regularizers
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D,GlobalAveragePooling2D, Concatenate, Reshape,GlobalMaxPooling2D, Activation, Input
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from classification_models.tfkeras import Classifiers
 from PIL import Image
 import numpy as np
 import pandas
@@ -19,22 +18,22 @@ import sys
 
 # GPU setup
 gpus = tf.config.experimental.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(gpus[0], True) 
+#tf.config.experimental.set_memory_growth(gpus[0], True) 
 
 # Config loading
 
-train_path = "../../bachelor-data/data_1280/allTrain.csv"
-validate_path ="../../bachelor-data/data_1280/allTest.csv"
+train_path = "../../bachelor-data/data_cat/train_medium.csv"
+validate_path ="../../bachelor-data/data_cat/train_medium.csv"
 
-image_dir = "../../bachelor-data/data_1280/"
+image_dir = "../../bachelor-data/data_cat/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
 learning_rate = 0.001
 
-image_height = 1280
-image_width = 1280
-batch_size = 6
+image_height = 224
+image_width = 224
+batch_size = 32
 numEpochs = 75
 
 conf= {
@@ -51,7 +50,7 @@ conf= {
 
 
 # select project
-neptune.init('lassegoransson/xrayPredictor-custom')
+neptune.init('lassegoransson/xrayPredictor-categorical')
 
 # Data generators
 train_df = pandas.read_csv(train_path)
@@ -77,7 +76,7 @@ train_generator = train_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="rgb"
+        color_mode="grayscale"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -89,27 +88,29 @@ val_generator = val_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="rgb"
+        color_mode="grayscale"
         )
 
 # Model
-ResNet18, preprocess_input = Classifiers.get('resnet18')
-RESNET = ResNet18(include_top=False, weights='imagenet', input_shape=(image_height,image_width,3), pooling="avg")
+RESNET = keras.applications.resnet.ResNet50(include_top=False, weights='imagenet', input_shape=(image_height,image_width,3), pooling="avg")
 model = tf.keras.Sequential()
 
+#for layer in RESNET.layers:
+#  model.add(layer)
+
+#for l in model.layers:
+#    l.trainable=False
 
 # Projection
-#model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
+model.add(Conv2D(3,(1,1),input_shape=(image_height,image_width,1),padding="same"))
 
-# Resnet
 model.add(RESNET)
-
-model.add(GlobalAveragePooling2D())
-
+#model.layers[1].trainable=True
 
 model.add(Dense(512,Activation("relu")))
 model.add(Dense(256,Activation("relu")))
 model.add(Dense(128,Activation("relu")))
+model.add(Dense(64,Activation("relu")))
 model.add(Dense(1))
 
 
@@ -130,13 +131,13 @@ class NeptuneMonitor(Callback):
 
 
 
-filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_mse:.16f}.hdf5"
+filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_loss:.16f}.hdf5"
 
-RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_mse', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
+RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
 
-checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_mse', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
+checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
 
-earlyStop = keras.callbacks.EarlyStopping(monitor='val_mse', mode='min', patience=10, restore_best_weights=True,verbose=1)
+earlyStop = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=10, restore_best_weights=True,verbose=1)
 
 with neptune.create_experiment(name=modelName, params=conf) as npexp:
     neptune_monitor = NeptuneMonitor()
