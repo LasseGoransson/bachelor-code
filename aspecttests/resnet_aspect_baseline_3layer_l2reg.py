@@ -25,14 +25,14 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 train_path = "../../bachelor-data/data_aspect/allTrain.csv"
 validate_path ="../../bachelor-data/data_aspect/allTest.csv"
 
-image_dir = "../../bachelor-data/data_aspect/"
+image_dir = "../../bachelor-data/data_aspect_320/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
 learning_rate = 0.001
 
-image_height =594
-image_width = 512
+image_height =515
+image_width = 320
 batch_size = 8
 numEpochs = 200
 
@@ -77,7 +77,7 @@ train_generator = train_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -89,7 +89,7 @@ val_generator = val_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 # Model
@@ -103,14 +103,14 @@ model = tf.keras.Sequential()
 #    l.trainable=False
 
 # Projection
-model.add(Conv2D(3,(1,1),input_shape=(image_height,image_width,1),padding="same"))
+#model.add(Conv2D(3,(1,1),input_shape=(image_height,image_width,1),padding="same"))
 
 model.add(RESNET)
 #model.layers[1].trainable=True
 
-model.add(Dense(512,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
-model.add(Dense(256,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
-model.add(Dense(128,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
+model.add(Dense(512,Activation("relu"),kernel_regularizer=regularizers.l2(0.00001)))
+model.add(Dense(256,Activation("relu"),kernel_regularizer=regularizers.l2(0.00001)))
+model.add(Dense(128,Activation("relu"),kernel_regularizer=regularizers.l2(0.00001)))
 model.add(Dense(1))
 
 
@@ -129,13 +129,13 @@ class NeptuneMonitor(Callback):
 
 
 
-filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_loss:.16f}.hdf5"
+filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_mse:.16f}.hdf5"
 
-RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
+RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_mse', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
 
-checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
+checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_mse', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
 
-earlyStop = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=10, restore_best_weights=True,verbose=1)
+earlyStop = keras.callbacks.EarlyStopping(monitor='val_mse', mode='min', patience=10, restore_best_weights=True,verbose=1)
 
 with neptune.create_experiment(name=modelName, params=conf) as npexp:
     neptune_monitor = NeptuneMonitor()
@@ -155,3 +155,4 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     tmp = modelfileName.split('-')[4].split('.')
     val = float(tmp[0]+"."+tmp[1])
     neptune.send_metric('val_loss', val)
+
