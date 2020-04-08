@@ -1,4 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import neptune
 import tensorflow as tf
 import tensorflow.keras as keras
@@ -10,7 +12,6 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from PIL import Image
 import numpy as np
 import pandas
-import os
 import pathlib
 import datetime
 import math
@@ -22,10 +23,10 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # Config loading
 
-train_path = "../../bachelor-data/data_resize/allTrain.csv"
-validate_path ="../../bachelor-data/data_resize/allTest.csv"
+train_path = "../../bachelor-data/allTrain.csv"
+validate_path ="../../bachelor-data/allTest.csv"
 
-image_dir = "../../bachelor-data/data_resize/"
+image_dir = "../../bachelor-data/data_224x224/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
@@ -34,7 +35,7 @@ learning_rate = 0.001
 image_height = 224
 image_width = 224
 batch_size = 32
-numEpochs = 75
+numEpochs = 200
 
 conf= {
         "train_path": train_path,
@@ -102,11 +103,10 @@ model = tf.keras.Sequential()
 # Resnet
 model.add(RESNET)
 
-model.add(Dense(512,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
-model.add(Dense(256,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
-model.add(Dense(128,Activation("relu"),kernel_regularizer=regularizers.l2(0.01)))
+model.add(Dense(512,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
+model.add(Dense(256,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
+model.add(Dense(128,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
 model.add(Dense(1))
-
 
 optimize = keras.optimizers.Adam(learning_rate=learning_rate)
 model.compile(optimizer=optimize,
@@ -151,3 +151,4 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     tmp = modelfileName.split('-')[4].split('.')
     val = float(tmp[0]+"."+tmp[1])
     neptune.send_metric('val_loss', val)
+
