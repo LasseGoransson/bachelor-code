@@ -21,10 +21,10 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # Config loading
 
-train_path = "../../bachelor-data/data_aspect/allTrain.csv"
-validate_path ="../../bachelor-data/data_aspect/allTest.csv"
+train_path = "../../bachelor-data/allTrain.csv"
+validate_path ="../../bachelor-data/allTest.csv"
 
-image_dir = "../../bachelor-data/data_aspect_320/"
+image_dir = "../../bachelor-data/data_320x515/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
@@ -32,7 +32,7 @@ learning_rate = 0.001
 
 image_height =515
 image_width = 320
-batch_size = 12
+batch_size = 8
 numEpochs = 200
 
 conf= {
@@ -106,7 +106,6 @@ model.add(Conv2D(3,(1,1),input_shape=(image_height,image_width,1),padding="same"
 
 model.add(RESNET)
 #model.layers[1].trainable=True
-model.add(Dropout(0.15))
 
 model.add(Dense(512,Activation("relu")))
 model.add(Dense(256,Activation("relu")))
@@ -134,7 +133,7 @@ filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_he
 
 RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
 
-checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
+checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_mse', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
 
 earlyStop = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=10, restore_best_weights=True,verbose=1)
 

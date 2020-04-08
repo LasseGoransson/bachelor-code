@@ -107,10 +107,11 @@ model = tf.keras.Sequential()
 
 model.add(RESNET)
 #model.layers[1].trainable=True
+model.add(keras.layers.GaussianNoise(2))
 
-model.add(Dense(512,Activation("relu"),kernel_regularizer=regularizers.l2(0.00001)))
-model.add(Dense(256,Activation("relu"),kernel_regularizer=regularizers.l2(0.00001)))
-model.add(Dense(128,Activation("relu"),kernel_regularizer=regularizers.l2(0.00001)))
+model.add(Dense(512,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
+model.add(Dense(256,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
+model.add(Dense(128,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
 model.add(Dense(1))
 
 

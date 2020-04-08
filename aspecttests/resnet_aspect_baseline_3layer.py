@@ -22,17 +22,17 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # Config loading
 
-train_path = "../../bachelor-data/data_aspect/allTrain.csv"
-validate_path ="../../bachelor-data/data_aspect/allTest.csv"
+train_path = "../../bachelor-data/allTrain.csv"
+validate_path ="../../bachelor-data/allTest.csv"
 
-image_dir = "../../bachelor-data/data_aspect_320/"
+image_dir = "../../bachelor-data/data_512x826/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
 learning_rate = 0.001
 
-image_height =515
-image_width = 320
+image_height =826
+image_width = 512
 batch_size = 8
 numEpochs = 200
 
@@ -91,7 +91,6 @@ val_generator = val_datagen.flow_from_dataframe(
         class_mode="raw",
         color_mode="rgb"
         )
-
 # Model
 RESNET = keras.applications.resnet.ResNet50(include_top=False, weights='imagenet', input_shape=(image_height,image_width,3), pooling="avg")
 model = tf.keras.Sequential()
@@ -109,11 +108,8 @@ model.add(RESNET)
 #model.layers[1].trainable=True
 
 model.add(Dense(512,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
-
 model.add(Dense(256,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
-
 model.add(Dense(128,Activation("relu"),kernel_regularizer=regularizers.l2(0.0001)))
-
 model.add(Dense(1))
 
 
@@ -134,16 +130,16 @@ class NeptuneMonitor(Callback):
 
 filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_loss:.16f}.hdf5"
 
-RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, verbose=1, mode='min', min_delta=0.00001, cooldown=0)
+RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
 
-checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=False, mode='min')
+checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
 
 earlyStop = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=10, restore_best_weights=True,verbose=1)
 
 with neptune.create_experiment(name=modelName, params=conf) as npexp:
     neptune_monitor = NeptuneMonitor()
 
-    callbacks_list = [checkpoint, neptune_monitor, RLR]
+    callbacks_list = [checkpoint, neptune_monitor, RLR, earlyStop]
 
     model.summary()
     history = model.fit(train_generator,validation_data=val_generator,verbose=1 , epochs=numEpochs, steps_per_epoch=train_generator.n/train_generator.batch_size , callbacks=callbacks_list)

@@ -1,0 +1,7 @@
+--2020-04-06 08:20:39--  https://ui.neptune.ai/api/backend/v1/storage/download?pathParam=0e51e3dc-4f52-454a-b811-2cff8311af57%2FXRAY%2FXRAY-155%2Fsource%2Fresnet_aspect_baseline_3layer.py
+Loaded CA certificate '/etc/ssl/certs/ca-certificates.crt'
+Resolving ui.neptune.ai (ui.neptune.ai)... 35.186.223.74
+Connecting to ui.neptune.ai (ui.neptune.ai)|35.186.223.74|:443... connected.
+HTTP request sent, awaiting response... 403 Forbidden
+2020-04-06 08:20:39 ERROR 403: Forbidden.
+
