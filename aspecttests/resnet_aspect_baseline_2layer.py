@@ -4,6 +4,7 @@ import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras.callbacks import Callback
 from tensorflow.keras.models import Sequential
+from tensorflow.keras import regularizers
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D,GlobalAveragePooling2D, Concatenate, Reshape,GlobalMaxPooling2D, Activation, Input
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from PIL import Image
@@ -32,7 +33,7 @@ learning_rate = 0.001
 
 image_height =515
 image_width = 320
-batch_size = 8
+batch_size = 16
 numEpochs = 200
 
 conf= {
@@ -76,7 +77,7 @@ train_generator = train_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -88,7 +89,7 @@ val_generator = val_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 # Model
@@ -102,17 +103,16 @@ model = tf.keras.Sequential()
 #    l.trainable=False
 
 # Projection
-model.add(Conv2D(3,(1,1),input_shape=(image_height,image_width,1),padding="same"))
+#model.add(Conv2D(3,(1,1),input_shape=(image_height,image_width,1),padding="same"))
 
 model.add(RESNET)
 #model.layers[1].trainable=True
 
 model.add(Dense(512,Activation("relu")))
+#model.add(Dropout(0.50))
 model.add(Dense(256,Activation("relu")))
-model.add(Dense(128,Activation("relu")))
-model.add(Dense(64,Activation("relu")))
+#model.add(Dropout(0.50))
 model.add(Dense(1))
-
 
 optimize = keras.optimizers.Adam(learning_rate=learning_rate)
 model.compile(optimizer=optimize,
@@ -155,3 +155,4 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     tmp = modelfileName.split('-')[4].split('.')
     val = float(tmp[0]+"."+tmp[1])
     neptune.send_metric('val_loss', val)
+

@@ -22,10 +22,10 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # Config loading
 
-train_path = "../../bachelor-data/data_aspect/allTrain.csv"
-validate_path ="../../bachelor-data/data_aspect/allTest.csv"
+train_path = "../../bachelor-data/allTrain.csv"
+validate_path ="../../bachelor-data/allTest.csv"
 
-image_dir = "../../bachelor-data/data_aspect_320x640/"
+image_dir = "../../bachelor-data/data_320x640_extentW/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 

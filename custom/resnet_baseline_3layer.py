@@ -1,9 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+
 import neptune
 import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras.callbacks import Callback
 from tensorflow.keras.models import Sequential
+from tensorflow.keras import regularizers
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D,GlobalAveragePooling2D, Concatenate, Reshape,GlobalMaxPooling2D, Activation, Input
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from PIL import Image
@@ -21,10 +25,10 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # Config loading
 
-train_path = "../../bachelor-data/allTrain.csv"
-validate_path ="../../bachelor-data/allTest.csv"
+train_path = "../../bachelor-data/data_320x515_mixed/allTrain.csv"
+validate_path ="../../bachelor-data/data_320x515_mixed/allTest.csv"
 
-image_dir = "../../bachelor-data/data_320x515_extentW/"
+image_dir = "../../bachelor-data/data_320x515_mixed/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
@@ -50,7 +54,7 @@ conf= {
 
 
 # select project
-neptune.init('lassegoransson/xrayPredictor')
+neptune.init('lassegoransson/xrayPredictor-custom')
 
 # Data generators
 train_df = pandas.read_csv(train_path)
@@ -76,7 +80,7 @@ train_generator = train_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -88,7 +92,7 @@ val_generator = val_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 # Model
@@ -102,7 +106,7 @@ model = tf.keras.Sequential()
 #    l.trainable=False
 
 # Projection
-model.add(Conv2D(3,(1,1),input_shape=(image_height,image_width,1),padding="same"))
+#model.add(Conv2D(3,(1,1),input_shape=(image_height,image_width,1),padding="same"))
 
 model.add(RESNET)
 #model.layers[1].trainable=True
@@ -110,7 +114,6 @@ model.add(RESNET)
 model.add(Dense(512,Activation("relu")))
 model.add(Dense(256,Activation("relu")))
 model.add(Dense(128,Activation("relu")))
-model.add(Dense(64,Activation("relu")))
 model.add(Dense(1))
 
 
@@ -155,3 +158,4 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     tmp = modelfileName.split('-')[4].split('.')
     val = float(tmp[0]+"."+tmp[1])
     neptune.send_metric('val_loss', val)
+

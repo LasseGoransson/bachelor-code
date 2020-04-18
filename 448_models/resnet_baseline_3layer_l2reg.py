@@ -22,10 +22,10 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # Config loading
 
-train_path = "../../bachelor-data/data_448/allTrain.csv"
-validate_path ="../../bachelor-data/data_448/allTest.csv"
+train_path = "../../bachelor-data/allTrain.csv"
+validate_path ="../../bachelor-data/allTest.csv"
 
-image_dir = "../../bachelor-data/data_448/"
+image_dir = "../../bachelor-data/data_448x448/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
@@ -33,7 +33,7 @@ learning_rate = 0.001
 
 image_height = 448
 image_width = 448
-batch_size = 32
+batch_size = 16
 numEpochs = 75
 
 conf= {
@@ -50,7 +50,7 @@ conf= {
 
 
 # select project
-neptune.init('lassegoransson/xrayPredictor-448x448')
+neptune.init('lassegoransson/xrayPredictor')
 
 # Data generators
 train_df = pandas.read_csv(train_path)
@@ -105,9 +105,9 @@ model.add(RESNET)
 
 
 
-model.add(Dense(512,Activation("relu"), kernel_regularizer=regularizers.l2(0.01)))
-model.add(Dense(256,Activation("relu"), kernel_regularizer=regularizers.l2(0.01)))
-model.add(Dense(128,Activation("relu"), kernel_regularizer=regularizers.l2(0.01)))
+model.add(Dense(512,Activation("relu"), kernel_regularizer=regularizers.l2(0.0001)))
+model.add(Dense(256,Activation("relu"), kernel_regularizer=regularizers.l2(0.0001)))
+model.add(Dense(128,Activation("relu"), kernel_regularizer=regularizers.l2(0.0001)))
 model.add(Dense(1))
 
 
