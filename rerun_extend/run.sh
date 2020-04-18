@@ -1,0 +1,12 @@
+./resnet_extent_3layer.py
+./resnet_extent_1layer.py
+./dropout25/resnet_extent_1layer_dropout25.py
+./dropout25/resnet_extent_2layer_dropout25.py
+./dropout25/resnet_extent_4layer_dropout25.py
+./dropout25/resnet_extent_3layer_dropout25.py
+./dropout50/resnet_extent_2layer_dropout50.py
+./dropout50/resnet_extent_3layer_dropout50.py
+./dropout50/resnet_extent_4layer_dropout50.py
+./dropout50/resnet_extent_1layer_dropout50.py
+./resnet_extent_4layer.py
+./resnet_extent_2layer.py
