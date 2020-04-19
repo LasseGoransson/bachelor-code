@@ -1,7 +1,4 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
-
 import neptune
 import tensorflow as tf
 import tensorflow.keras as keras
@@ -25,19 +22,19 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # Config loading
 
-train_path = "~/bachelor-data/allTrain.csv"
-validate_path ="~/bachelor-data/allTest.csv"
+train_path = "../../bachelor-data/data_resize/allTrain.csv"
+validate_path ="../../bachelor-data/data_resize/allTest.csv"
 
-image_dir = "../../bachelor-data/data/"
+image_dir = "../../bachelor-data/data_resize/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
 learning_rate = 0.001
 
-image_height =515
-image_width = 320
-batch_size = 8
-numEpochs = 200
+image_height = 224
+image_width = 224
+batch_size = 32
+numEpochs = 75
 
 conf= {
         "train_path": train_path,
@@ -48,13 +45,12 @@ conf= {
         "image_height": image_height,
         "image_width": image_width,
         "batch_size": batch_size,
-        "numEpochs": numEpochs,
-        "aspectImages": "true"
+        "numEpochs": numEpochs
         }
 
 
 # select project
-neptune.init('lassegoransson/xrayPredictor-custom')
+neptune.init('lassegoransson/xrayPredictor')
 
 # Data generators
 train_df = pandas.read_csv(train_path)
@@ -63,7 +59,9 @@ validate_df = pandas.read_csv(validate_path)
 train_datagen = ImageDataGenerator(
         rescale=1./255,
         horizontal_flip=True,
-        vertical_flip=True
+        vertical_flip=True,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
         )
 
 val_datagen = ImageDataGenerator(
@@ -80,7 +78,7 @@ train_generator = train_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="rgb"
+        color_mode="grayscale"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -92,28 +90,22 @@ val_generator = val_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="rgb"
+        color_mode="grayscale"
         )
 
 # Model
 RESNET = keras.applications.resnet.ResNet50(include_top=False, weights='imagenet', input_shape=(image_height,image_width,3), pooling="avg")
 model = tf.keras.Sequential()
 
-#for layer in RESNET.layers:
-#  model.add(layer)
-
-#for l in model.layers:
-#    l.trainable=False
 
 # Projection
-#model.add(Conv2D(3,(1,1),input_shape=(image_height,image_width,1),padding="same"))
+model.add(Conv2D(3,(3,3),input_shape=(image_height,image_width,1),padding="same"))
 
+# Resnet
 model.add(RESNET)
-#model.layers[1].trainable=True
 
 model.add(Dense(512,Activation("relu")))
-model.add(Dense(256,Activation("relu")))
-model.add(Dense(128,Activation("relu")))
+model.add(Dense(512,Activation("relu")))
 model.add(Dense(1))
 
 
@@ -127,18 +119,20 @@ model.compile(optimizer=optimize,
 class NeptuneMonitor(Callback):
     def on_epoch_end(self, epoch, logs={}):
         neptune.send_metric('val_loss', epoch, logs['val_loss'])
+        neptune.send_metric('val_mse', epoch, logs['val_mse'])
         neptune.send_metric('loss', epoch, logs['loss'])
+        neptune.send_metric('mse', epoch, logs['mse'])
         neptune.send_metric('learning_rate', epoch, float(tf.keras.backend.get_value(self.model.optimizer.lr)))
 
 
 
-filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_loss:.16f}.hdf5"
+filepath=str(checkpointpath)+"model_"+str(modelName)+"_checkpoint-"+str(image_height)+"x"+str(image_width)+"-{epoch:03d}-{val_mse:.16f}.hdf5"
 
-RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
+RLR = keras.callbacks.ReduceLROnPlateau(monitor='val_mse', factor=0.5, patience=2, verbose=1, mode='min', min_delta=0.0001, cooldown=0)
 
-checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
+checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_mse', verbose=0, save_best_only=True, save_weights_only=False, mode='min')
 
-earlyStop = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=10, restore_best_weights=True,verbose=1)
+earlyStop = keras.callbacks.EarlyStopping(monitor='val_mse', mode='min', patience=10, restore_best_weights=True,verbose=1)
 
 with neptune.create_experiment(name=modelName, params=conf) as npexp:
     neptune_monitor = NeptuneMonitor()
@@ -158,4 +152,3 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     tmp = modelfileName.split('-')[4].split('.')
     val = float(tmp[0]+"."+tmp[1])
     neptune.send_metric('val_loss', val)
-
