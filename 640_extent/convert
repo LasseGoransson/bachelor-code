@@ -1,0 +1,5 @@
+ sed -i 's/xrayPredictor\-rerun/xrayPredictor/g' $1
+ sed -i 's/data\_320x515\_extentW/data_640x1030_extentW/g' $1
+ sed -i 's/515/1030/g' $1
+ sed -i 's/320/640/g' $1 
+ sed -i 's/8/4/g' $1 
