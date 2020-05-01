@@ -51,7 +51,7 @@ conf= {
 
 
 # select project
-neptune.init('lassegoransson/xrayPredictor-rerun')
+neptune.init('lassegoransson/xrayPredictor')
 
 # Data generators
 train_df = pandas.read_csv(train_path)
@@ -77,7 +77,7 @@ train_generator = train_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -89,7 +89,7 @@ val_generator = val_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="grayscale"
+        color_mode="rgb"
         )
 
 # Model
@@ -105,11 +105,8 @@ model = tf.keras.Sequential()
 # Projection
 
 model.add(RESNET)
-
 model.add(Conv2D(3,(1,1),padding="same"))
-
 model.add(GlobalAveragePooling2D())
-
 #model.layers[1].trainable=True
 
 model.add(Dense(512,Activation("relu")))
@@ -123,8 +120,6 @@ model.compile(optimizer=optimize,
               metrics=['mse']
               )
 
-model.summery()
-exit()
 
 class NeptuneMonitor(Callback):
     def on_epoch_end(self, epoch, logs={}):
