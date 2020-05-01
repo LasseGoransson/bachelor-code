@@ -1,0 +1,11 @@
+ipython eval.py XRAY-242 ~/bachelor-data/data_640x1030_extentW/ & 
+sleep 60
+ipython eval.py XRAY-243 ~/bachelor-data/data_640x1030_extentW/ &
+sleep 60
+ipython eval.py XRAY-244 ~/bachelor-data/data_640x1030_extentW/ &
+sleep 60
+ipython eval.py XRAY-245 ~/bachelor-data/data_640x1030_extentW/ &
+sleep 60
+ipython eval.py XRAY-246 ~/bachelor-data/data_640x1030_extentW/ &
+sleep 60
+ipython eval.py XRAY-247 ~/bachelor-data/data_640x1030_extentW/ &
