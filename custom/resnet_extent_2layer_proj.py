@@ -25,7 +25,7 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 train_path = "../../bachelor-data/allTrain.csv"
 validate_path ="../../bachelor-data/allTest.csv"
 
-image_dir = "../../bachelor-data/data_320x515_extentW/"
+image_dir = "../../bachelor-data/data_320x515_extentW_sharp/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
@@ -77,7 +77,7 @@ train_generator = train_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="rgb"
+        color_mode="grayscale"
         )
 
 val_generator = val_datagen.flow_from_dataframe(
@@ -89,11 +89,11 @@ val_generator = val_datagen.flow_from_dataframe(
         batch_size=batch_size,
         shuffle=True,
         class_mode="raw",
-        color_mode="rgb"
+        color_mode="grayscale"
         )
 
 # Model
-RESNET = keras.applications.resnet.ResNet50(include_top=False, weights='imagenet', input_shape=(image_height,image_width,3))
+RESNET = keras.applications.resnet.ResNet50(include_top=False, weights='imagenet', input_shape=(image_height,image_width,3), pooling="avg")
 model = tf.keras.Sequential()
 
 #for layer in RESNET.layers:
@@ -103,10 +103,9 @@ model = tf.keras.Sequential()
 #    l.trainable=False
 
 # Projection
+model.add(Conv2D(3,(1,1),input_shape=(image_height,image_width,1),padding="same"))
 
 model.add(RESNET)
-model.add(Conv2D(3,(1,1),padding="same"))
-model.add(GlobalAveragePooling2D())
 #model.layers[1].trainable=True
 
 model.add(Dense(512,Activation("relu")))
