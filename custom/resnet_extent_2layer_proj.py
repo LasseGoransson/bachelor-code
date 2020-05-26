@@ -22,10 +22,14 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # Config loading
 
-train_path = "../../bachelor-data/allTrain.csv"
-validate_path ="../../bachelor-data/allTest.csv"
+train_path = "../../../bachelor-data/allTrain.csv"
+validate_path ="../../../bachelor-data/allTest.csv"
 
+<<<<<<< HEAD
 image_dir = "../../bachelor-data/data_224x224_extentW_square/"
+=======
+image_dir = "../../../bachelor-data/lanczos/data_320x515_extentW_lanczos/"
+>>>>>>> 18baf755fc2671a5c77fcc5492303a7e1e5dcce8
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
@@ -154,5 +158,6 @@ with neptune.create_experiment(name=modelName, params=conf) as npexp:
     tmp = modelfileName.split('-')[4].split('.')
     val = float(tmp[0]+"."+tmp[1])
     neptune.send_metric('val_loss', val)
+
 
 
