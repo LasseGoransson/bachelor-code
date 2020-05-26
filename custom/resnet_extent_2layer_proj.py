@@ -25,15 +25,15 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 train_path = "../../bachelor-data/allTrain.csv"
 validate_path ="../../bachelor-data/allTest.csv"
 
-image_dir = "../../bachelor-data/data_320x515_extentW_sharp/"
+image_dir = "../../bachelor-data/data_224x224_extentW_square/"
 checkpointpath = "../../bachelor-data/checkpoints/"
 modelName = sys.argv[0]
 
 learning_rate = 0.001
 
-image_height =515
-image_width = 320
-batch_size = 8
+image_height =224
+image_width = 224
+batch_size = 64
 numEpochs = 200
 
 conf= {
@@ -51,7 +51,7 @@ conf= {
 
 
 # select project
-neptune.init('lassegoransson/xrayPredictor')
+neptune.init('lassegoransson/xrayPredictor-rerun')
 
 # Data generators
 train_df = pandas.read_csv(train_path)

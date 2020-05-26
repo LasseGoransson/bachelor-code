@@ -5,6 +5,8 @@
 
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras.models import Sequential
@@ -56,23 +58,24 @@ project = neptune.init(project,api_token=key)
 
 get_ipython().system('rm output/*')
 ex = exp = project.get_experiments(name)[0]
-ex.download_artifacts()
-get_ipython().system('unzip output.zip')
+#ex.download_artifacts()
+#get_ipython().system('unzip output.zip')
 
 
 # In[94]:
 
 
-files = get_ipython().getoutput('find output/ -name "model*"')
-files
+#files = get_ipython().getoutput('find output/ -name "model*"')
+#files
 
 
 # In[95]:
 
 
-modelname = files[0]
-modelpath = str(modelname.split("/")[1])
-print(modelpath)
+#modelname = files[0]
+#modelpath = str(modelname.split("/")[1])
+modelname = "/home/lasg/bachelor-data/models/"+str(sys.argv[1])+".hdf5"
+print(modelname)
 model = tf.keras.models.load_model(modelname, custom_objects={'Activation': tf.keras.layers.Activation})
 
 
@@ -145,6 +148,7 @@ else:
 
 n = []
 nnon=[]
+diviate=[]
 mse=0
 hits=[0,0,0,0,0,0]
 labeltrueVal = 0
@@ -159,6 +163,7 @@ for b in range(0,test_generator.n):
   val =(1-(label/predict))
   mse+=((1/test_generator.n)*(label-predict)*(label-predict))
   nnon.append(val)
+  diviate.append(predict-label)
   val=abs(val)
   n.append(val)
   if val < 0.05:
@@ -211,7 +216,9 @@ print("< 25.0% = " + str(100*hits[4]/(test_generator.n))+ "%")
 print("< 30.0% = " + str(100*hits[5]/(test_generator.n))+ "%")
 print("")
 print("Deviation summed over full batch")
-print("Predicted weight: "+str(labelval)+" True weight: "+str(labeltrueVal)+" Percentage: "+str((labelval/labeltrueVal)*100))
+print("Predicted weight: "+str(labelval)+" True weight: "+str(labeltrueVal)+" Percentage: "+str((labelval/labeltrueVal)*100)+" Avg label: "+str(labeltrueVal/test_generator.n))
+print("Diviate mean in kg:"+str(np.mean(diviate)))
+print("Diviate var in kg:"+str(np.var(diviate)))
 
 
 # In[ ]:
